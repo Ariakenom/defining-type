@@ -4,18 +4,14 @@ https://en.wikipedia.org/wiki/Logarithmic_number_system)
 ```
 {-# LANGUAGE TypeApplications #-}
 import Data.Int
-```
 
-```
--- L8 x = 2^(x/l8Div)
-
-l8Div :: Num a => a
-l8Div = 8
+d :: Num a => a
+d = 8
 
 newtype L8 = L8 Int8
 ```
 
-Each number is represented by an 8 bit int, x. The comment at the top describes how to turn the Integer x into the Real number it represents. Another point of view is that a Real number `y` is represented by a Fixed Point number `z` such that `y = 2^z`.
+Each number is represented by an 8 bit int, `x`. This integer represents a real number `y = 2^(x/d)`. Another view is that we're storing a fixed point number `z = x/d` and that the number we're representing the same number `y = 2^z`.
 
 This can represent some positive rational numbers. It's a nice way of learning some about floating point numbers because the errors are a bit more regular than floats. And with only 8 bits we will get a lot of error! Interestingly we don't have 0. In floats 0 is a special representation, similar to NaN or infinities. We also dont have negative numbers, we could add that via a sign bit.
 
@@ -31,11 +27,11 @@ The `Fractional` typeclass handles literals like `0.1` via `fromRational`. It al
 
 Sidenote, the number classes are a bit of a mess. But they are still fun to play around with.
 
-The transormation from a Rational to our representation looks a bit like this: `y = 2^(x/l8Div) => x = floor (log2 y * l8Div)`.
+The transormation from a Rational to our representation looks a bit like this: `y = 2^(x/d) => x = floor (log2 y * d)`.
 
 ```
 l8_fromRational :: Rational -> L8
-l8_fromRational = L8 (satFloor (l8Div * log2 (fromRational x)))
+l8_fromRational = L8 (satFloor (d * log2 (fromRational x)))
 ```
 
 The `@Double` is a [type application](https://downloads.haskell.org/ghc/latest/docs/html/users_guide/glasgow_exts.html#extension-TypeApplications). None of the type applications are necessary in this code but we will use them to point out which type is used in some general type.
@@ -75,7 +71,7 @@ viaRat :: (Fractional c, Real a) => a -> c
 viaRat = fromRational . toRational -- realToFrac
 
 instance Real L8 where
-    toRational (L8 x) = viaRat (2**(viaRat x / l8Div))
+    toRational (L8 x) = viaRat (2**(viaRat x / d))
 
 instance Show L8 where
     show = show @Double . viaRat
