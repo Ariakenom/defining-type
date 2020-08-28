@@ -11,7 +11,7 @@ d = 8
 newtype L8 = L8 Int8
 ```
 
-Each number is represented by an 8 bit int, `x`. This integer represents a real number `y = 2^(x/d)`. Another view is that we're storing a fixed point number `z = x/d` and that the number we're representing the same number `y = 2^z`.
+Each number is represented by an 8 bit int, `x`. This integer represents a real number `y = 2^(x/d)`. Another view is that we're storing a fixed point number `z = x/d` and that represents the same number `y = 2^z`.
 
 This can represent some positive rational numbers. It's a nice way of learning some about floating point numbers because the errors are a bit more regular than floats. And with only 8 bits we will get a lot of error! Interestingly we don't have 0. In floats 0 is a special representation, similar to NaN or infinities. We also dont have negative numbers, we could add that via a sign bit.
 
