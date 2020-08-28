@@ -1,19 +1,19 @@
 Defining number types in haskell is fun. [Let's represent a number by it's logarithm!](
 https://en.wikipedia.org/wiki/Logarithmic_number_system)
 
-´´´
+```
 {-# LANGUAGE TypeApplications #-}
 import Data.Int
-´´´
+```
 
-´´´
+```
 -- L8 x = 2^(x/l8Div)
 
 l8Div :: Num a => a
 l8Div = 8
 
 newtype L8 = L8 Int8
-´´´
+```
 
 Each number is represented by an 8 bit int, x. The comment at the top describes how to turn the Integer x into the Real number it represents. Another point of view is that a Real number `y` is represented by a Fixed Point number `z` such that `y = 2^z`.
 
@@ -21,11 +21,11 @@ This can represent some positive rational numbers. It's a nice way of learning s
 
 Let's add literals for our numbers.
 
-´´´
+```
 instance Fractional L8 where
     fromRational = l8_fromRational
     (/) = l8_div
-´´´
+```
 
 The `Fractional` typeclass handles literals like `0.1` via `fromRational`. It also defines division and `recip`.
 
@@ -33,10 +33,10 @@ Sidenote, the number classes are a bit of a mess. But they are still fun to play
 
 The transormation from a Rational to our representation looks a bit like this: `y = 2^(x/l8Div) => x = floor (log2 y * l8Div)`.
 
-´´´
+```
 l8_fromRational :: Rational -> L8
 l8_fromRational = L8 (satFloor (l8Div * log2 (fromRational x)))
-´´´
+```
 
 The `@Double` is a [type application](https://downloads.haskell.org/ghc/latest/docs/html/users_guide/glasgow_exts.html#extension-TypeApplications). None of the type applications are necessary in this code but we will use them to point out which type is used in some general type.
 
@@ -44,7 +44,7 @@ We start by making the Rational into a Double. There is some inaccuracy there bu
 
 We made use of some helper functions
 
-´´´
+```
 log2 :: Floating a => a -> a
 log2 = logBase 2
 
@@ -64,13 +64,13 @@ satFloor x = y
     where y  = floor . min hi . max lo $ x
           lo = viaInteger (minBound `asTypeOf` y)
           hi = viaInteger (maxBound `asTypeOf` y)
-´´´
+```
 
 The saturating part means that `-1`, or another number less than what we can represent, will result in the smallest number representable and the same for numbers bigger than what we can represent. The choice of floor instead of round and to saturate instead of error is mostly arbitrary.
 
 Now let's define Show which will show our literals to us after they've been converted.
 
-´´´
+```
 viaRat :: (Fractional c, Real a) => a -> c
 viaRat = fromRational . toRational -- realToFrac
 
@@ -79,11 +79,11 @@ instance Real L8 where
 
 instance Show L8 where
     show = show @Double . viaRat
-´´´
+```
 
 Allright let's test it out
 
-´´´
+```
 λ> 0 :: L8
 1.52587890625e-5
 λ> 1 :: L8
@@ -96,13 +96,13 @@ Allright let's test it out
 0.5
 λ> 0.1 :: L8
 9.63881765879963e-2
-´´´
+```
 
 Nice ... that's an interesting outcome. What's the largest number we can represent?
 
 And finally we define some arithmetic.
 
-´´´
+```
 unwrap f (L8 x) = L8 (f x)
 unwrap' f (L8 x) = f x
 unwrap2 f (L8 x) (L8 y) = L8 (f x y)
@@ -131,4 +131,4 @@ instance Ord L8 where
 instance Enum L8 where
     fromEnum (L8 x) = fromEnum x
     toEnum   x = L8 (toEnum   x)
-´´´
+```
